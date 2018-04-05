@@ -9,7 +9,9 @@ import cn.xlunzi.saolei.common.Constant.LEFT_UP
 import cn.xlunzi.saolei.common.Constant.RIGHT
 import cn.xlunzi.saolei.common.Constant.RIGHT_DOWN
 import cn.xlunzi.saolei.common.Constant.RIGHT_UP
+import cn.xlunzi.saolei.common.Constant.TYPE_SHOW
 import cn.xlunzi.saolei.common.Constant.UP
+import cn.xlunzi.saolei.utils.PrintUtil
 import java.util.*
 
 /**
@@ -56,7 +58,35 @@ object LeiMgr {
         }
     }
 
+    fun showZeroNearby(position: Int, numList: MutableList<Int>, leiList: MutableList<Int>) {
+        val direction = getDirection(position)
+        direction.forEachIndexed { index, it ->
+            if (it) {
+                val pos: Int = getPos(index, position)
+                if (pos != -1 && leiList[pos] != TYPE_SHOW) {
+                    leiList[pos] = TYPE_SHOW
+                    if (numList[pos] == DEFAULT_NUM) {
+                        showZeroNearby(pos, numList, leiList)
+                    }
+                }
+            }
+        }
+    }
+
     private fun signNearby(position: Int, numList: MutableList<Int>) {
+        val direction = getDirection(position)
+        direction.forEachIndexed { index, it ->
+            if (it) {
+                val pos: Int = getPos(index, position)
+                if (pos != -1 && numList[pos] != IS_LEI) {
+                    numList[pos]++
+                }
+            }
+        }
+    }
+
+    /** 获取存在的方向*/
+    private fun getDirection(position: Int): MutableList<Boolean> {
         // position [0，80)
         // 行
         val row = position / COLUMN + 1 // [1,8]
@@ -89,24 +119,20 @@ object LeiMgr {
                 direction[RIGHT_DOWN] = false // 右下
             }
         }
+        return direction
+    }
 
-        direction.forEachIndexed { index, b ->
-            if (b) {
-                var pos: Int = -1
-                when (index) {
-                    LEFT_UP -> pos = position - COLUMN - 1
-                    UP -> pos = position - COLUMN
-                    RIGHT_UP -> pos = position - COLUMN + 1
-                    RIGHT -> pos = position + 1
-                    RIGHT_DOWN -> pos = position + COLUMN + 1
-                    DOWN -> pos = position + COLUMN
-                    LEFT_DOWN -> pos = position + COLUMN - 1
-                    LEFT -> pos = position - 1
-                }
-                if (pos != -1 && numList[pos] != IS_LEI) {
-                    numList[pos]++
-                }
-            }
+    private fun getPos(direction: Int, position: Int): Int {
+        return when (direction) {
+            LEFT_UP -> position - COLUMN - 1
+            UP -> position - COLUMN
+            RIGHT_UP -> position - COLUMN + 1
+            RIGHT -> position + 1
+            RIGHT_DOWN -> position + COLUMN + 1
+            DOWN -> position + COLUMN
+            LEFT_DOWN -> position + COLUMN - 1
+            LEFT -> position - 1
+            else -> -1
         }
     }
 }

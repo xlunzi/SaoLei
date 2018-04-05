@@ -8,9 +8,11 @@ import android.graphics.drawable.ColorDrawable
  */
 object ColorUtil {
 
-    val WHITE = ColorDrawable(Color.parseColor("#FFFFFFFF"))
-    val BLUE = ColorDrawable(Color.parseColor("#FF26A69A"))
-    val RED = ColorDrawable(Color.parseColor("#FFFFAEC9"))
+    val WHITE_Drawable = ColorDrawable(Color.parseColor("#FFFFFFFF"))
+    val BLUE_Drawable = ColorDrawable(Color.parseColor("#FF26A69A"))
+    val RED_Drawable = ColorDrawable(Color.parseColor("#FFFFAEC9"))
 
-    val LEI = ColorDrawable(Color.parseColor("#FFFF00FF"))
+    val TRANSPARENT_Drawable = ColorDrawable(Color.TRANSPARENT)
+
+    val LEI_Drawable = ColorDrawable(Color.parseColor("#FFFF00FF"))
 }

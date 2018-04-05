@@ -2,6 +2,7 @@ package cn.xlunzi.saolei.activity
 
 import android.app.Activity
 import android.os.Bundle
+import android.os.CountDownTimer
 import cn.xlunzi.saolei.R
 import cn.xlunzi.saolei.adapter.MyAdapter
 import cn.xlunzi.saolei.common.Constant.DEFAULT_NUM
@@ -12,6 +13,10 @@ import cn.xlunzi.saolei.common.Constant.TYPE_SIGN
 import cn.xlunzi.saolei.manger.LeiMgr
 import cn.xlunzi.saolei.manger.LeiMgr.COLUMN
 import cn.xlunzi.saolei.manger.LeiMgr.ROW
+import cn.xlunzi.saolei.utils.ColorUtil.BLUE_Drawable
+import cn.xlunzi.saolei.utils.ColorUtil.RED_Drawable
+import cn.xlunzi.saolei.utils.ColorUtil.TRANSPARENT_Drawable
+import cn.xlunzi.saolei.utils.TT
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : Activity() {
@@ -22,6 +27,10 @@ class MainActivity : Activity() {
 
     private val numList = MutableList(COLUMN * ROW, { DEFAULT_NUM })
     private val leiList = MutableList(COLUMN * ROW, { TYPE_HIDE })
+
+    private var stop = false
+
+    private var countDownTimer: CountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,36 +49,44 @@ class MainActivity : Activity() {
         }
 
         gv_content.setOnItemClickListener { parent, view, position, id ->
-            when (leiList[position]) {
-                TYPE_HIDE -> {
-                    when (numList[position]) {
-                        IS_LEI -> gameOver() // 点到雷，OVER
-                        else -> leiList[position] = TYPE_SHOW
+            if (!stop) {
+                when (leiList[position]) {
+                    TYPE_HIDE -> {
+                        when (numList[position]) {
+                            DEFAULT_NUM -> {
+                                leiList[position] = TYPE_SHOW
+                                LeiMgr.showZeroNearby(position, numList, leiList)
+                            }
+                            IS_LEI -> gameOver() // 点到雷，反转并等待
+                            else -> leiList[position] = TYPE_SHOW
+                        }
+                    }
+                    TYPE_SIGN -> {
+                    }
+                    TYPE_SHOW -> {
                     }
                 }
-                TYPE_SIGN -> {
-                }
-                TYPE_SHOW -> {
-                }
+                mAdapter.notifyDataSetChanged()
             }
-            mAdapter.notifyDataSetChanged()
         }
 
         gv_content.setOnItemLongClickListener { parent, view, position, id ->
-            when (leiList[position]) {
-                TYPE_HIDE -> {
-                    leiList[position] = TYPE_SIGN
-                    setLeiNum(leiNum - 1)
+            if (!stop) {
+                when (leiList[position]) {
+                    TYPE_HIDE -> {
+                        leiList[position] = TYPE_SIGN
+                        setLeiNum(leiNum - 1)
+                    }
+                    TYPE_SIGN -> {
+                        setLeiNum(leiNum + 1)
+                        leiList[position] = TYPE_HIDE
+                    }
+                    TYPE_SHOW -> {
+                    }
                 }
-                TYPE_SIGN -> {
-                    setLeiNum(leiNum + 1)
-                    leiList[position] = TYPE_HIDE
-                }
-                TYPE_SHOW -> {
-                }
-            }
 
-            mAdapter.notifyDataSetChanged()
+                mAdapter.notifyDataSetChanged()
+            }
             true
         }
 
@@ -77,6 +94,10 @@ class MainActivity : Activity() {
 
     /** 重置游戏*/
     private fun resetGame() {
+        if (countDownTimer != null) {
+            countDownTimer!!.cancel()
+        }
+        stop = false
         leiList.forEachIndexed { index, it ->
             when (it) {
                 TYPE_HIDE -> {
@@ -95,6 +116,29 @@ class MainActivity : Activity() {
     }
 
     private fun gameOver() {
-        tv_title.text = "游戏结束"
+        stop = true
+        tv_title.text = "踩到雷了，请等待"
+        numList.reverse()
+        leiList.reverse()
+
+        if (countDownTimer != null) {
+            countDownTimer!!.cancel()
+        }
+        countDownTimer = object : CountDownTimer(10 * 1000, 1 * 500) {
+            override fun onTick(millisUntilFinished: Long) {
+                tv_title.background = when (millisUntilFinished / 500 % 2) {
+                    0L -> RED_Drawable
+                    else -> BLUE_Drawable
+                }
+                TT.show("还有 $millisUntilFinished 毫秒")
+            }
+
+            override fun onFinish() {
+                stop = false
+                setLeiNum(leiNum)
+                TT.show("请继续")
+                tv_title.background = TRANSPARENT_Drawable
+            }
+        }.start()
     }
 }

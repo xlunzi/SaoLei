@@ -23,6 +23,7 @@
         android:layout_below="@id/tv_start"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/px36"
+        android:padding="@dimen/px36"
         android:text="还有X个雷"
         android:textSize="@dimen/px60" />
 

@@ -36,16 +36,21 @@ class MyAdapter(private var mContext: Context, private var numList: List<Int>, p
         when (leiList[position]) {
             TYPE_HIDE -> {
                 holder.tvNum.text = ""
-                holder.tvNum.background = ColorUtil.BLUE
+                holder.tvNum.background = ColorUtil.BLUE_Drawable
             }
             TYPE_SIGN -> {
                 holder.tvNum.text = "雷"
-                holder.tvNum.background = ColorUtil.RED
+                holder.tvNum.background = ColorUtil.RED_Drawable
             }
             TYPE_SHOW -> {
                 // 显示
-                holder.tvNum.text = numList[position].toString()
-                holder.tvNum.background = ColorUtil.WHITE
+                val num = numList[position]
+                if (num == 0) {
+                    holder.tvNum.text = ""
+                } else {
+                    holder.tvNum.text = num.toString()
+                }
+                holder.tvNum.background = ColorUtil.WHITE_Drawable
             }
         }
         return view
