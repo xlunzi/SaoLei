@@ -26,7 +26,7 @@ object LeiMgr {
     const val COLUMN: Int = 8
 
     /** 雷的系数*/
-    const val KEY: Float = 0.20f
+    private const val KEY: Float = 0.20f
     /** 总雷数 */
     const val TOTAL: Int = (ROW * COLUMN * KEY).toInt()
 
